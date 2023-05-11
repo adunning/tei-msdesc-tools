@@ -1,4 +1,4 @@
-"""Classes for representing TEI elements."""
+"""Classes representing TEI elements."""
 
 
 from dataclasses import dataclass, field

@@ -1,8 +1,12 @@
-"""Classes for manipulating XML files."""
+"""Classes for manipulating TEI XML files."""
+
+import os
+import re
+import sys
 
 from lxml import etree
 
-from .elements import Category
+from tei.elements import Category
 
 NS: dict[str, str] = {"tei": "http://www.tei-c.org/ns/1.0"}
 
@@ -41,7 +45,27 @@ class XMLFile:
             file.truncate()
 
 
-class WorksFile(XMLFile):
+class AuthorityFile(XMLFile):
+    """Represents an authority file (persons.xml, places.xml, or works.xml)."""
+
+    @property
+    def keys(self) -> set[str]:
+        """
+        Returns a set of all xml:id attributes
+        on <person>, <place>, <org>, and <bibl> elements.
+        """
+        return {
+            elem.get("{http://www.w3.org/XML/1998/namespace}id")
+            for elem in self.tree.iter(
+                "{http://www.tei-c.org/ns/1.0}person",
+                "{http://www.tei-c.org/ns/1.0}place",
+                "{http://www.tei-c.org/ns/1.0}org",
+                "{http://www.tei-c.org/ns/1.0}bibl",
+            )
+        }
+
+
+class WorksFile(AuthorityFile):
     """Represents the works file."""
 
     @property
@@ -51,3 +75,52 @@ class WorksFile(XMLFile):
             Category(category)
             for category in self.tree.xpath("//tei:category", namespaces=NS)
         ]
+
+
+class Collections:
+    """Represents a directory of TEI XML manuscript descriptions."""
+
+    def __init__(self, directory_path: str) -> None:
+        self.directory_path: str = directory_path
+
+    @property
+    def xml_paths(self) -> list[str]:
+        """Returns a list of XML files in the directory."""
+        return [
+            os.path.join(root, file)
+            for root, _, files in os.walk(self.directory_path)
+            for file in files
+            if file.endswith(".xml")
+        ]
+
+
+class MSDesc(XMLFile):
+    """Represents a TEI XML manuscript description."""
+
+    def check_keys(self, authority_keys: set[str]) -> bool:
+        """Returns True if every @key reference is valid, False otherwise."""
+        KeysValid = True
+        for key_elem in self.tree.xpath("//@key/parent::*"):
+            line_number: int = key_elem.sourceline
+            key: str = key_elem.get("key")
+
+            # is the key empty?
+            if key == "":
+                sys.stderr.write(
+                    f"Error: empty key in {self.file_path}, line {line_number}\n"
+                )
+                KeysValid = False
+            # is the key in the form of `prefix_1234`?
+            elif not re.match(r"\w+_\d+", key):
+                sys.stderr.write(
+                    f"Error: {key} is invalid in {self.file_path}, line {line_number}\n"
+                )
+                KeysValid = False
+            # is the key in the authority files?
+            elif key not in authority_keys:
+                sys.stderr.write(
+                    f"Error: {key} not found in authority files in {self.file_path}, line {line_number}\n"
+                )
+                KeysValid = False
+
+        return KeysValid
