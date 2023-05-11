@@ -6,9 +6,7 @@ import sys
 
 from lxml import etree
 
-from tei.elements import Category
-
-NS: dict[str, str] = {"tei": "http://www.tei-c.org/ns/1.0"}
+from tei.elements import Category, Namespace
 
 
 class XMLFile:
@@ -73,7 +71,7 @@ class WorksFile(AuthorityFile):
         """Return a list of Category objects."""
         return [
             Category(category)
-            for category in self.tree.xpath("//tei:category", namespaces=NS)
+            for category in self.tree.xpath("//tei:category", namespaces=Namespace.tei)
         ]
 
 
@@ -84,7 +82,7 @@ class Collections:
         self.directory_path: str = directory_path
 
     @property
-    def xml_paths(self) -> list[str]:
+    def paths(self) -> list[str]:
         """Returns a list of XML files in the directory."""
         return [
             os.path.join(root, file)

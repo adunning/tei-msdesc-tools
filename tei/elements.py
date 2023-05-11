@@ -5,7 +5,12 @@ from dataclasses import dataclass, field
 
 from lxml import etree
 
-NS: dict[str, str] = {"tei": "http://www.tei-c.org/ns/1.0"}
+
+class Namespace:
+    """Namespaces for TEI XML elements."""
+
+    tei: dict[str, str] = {"tei": "http://www.tei-c.org/ns/1.0"}
+    xml: dict[str, str] = {"xml": "http://www.w3.org/XML/1998/namespace"}
 
 
 @dataclass
@@ -27,7 +32,7 @@ class Category(XMLElement):
 
     def __post_init__(self) -> None:
         super().__post_init__()
-        self.catDesc = self.element.findtext("tei:catDesc", namespaces=NS)
+        self.catDesc = self.element.findtext("tei:catDesc", namespaces=Namespace.tei)
 
 
 @dataclass
@@ -39,7 +44,8 @@ class Bibl(XMLElement):
     def __post_init__(self) -> None:
         super().__post_init__()
         self.title = ", ".join(
-            title.text for title in self.element.findall("tei:title", namespaces=NS)
+            title.text
+            for title in self.element.findall("tei:title", namespaces=Namespace.tei)
         )
 
     def add_term(self, category: str) -> None:

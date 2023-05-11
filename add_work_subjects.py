@@ -14,10 +14,8 @@ Usage:
 import argparse
 import sys
 
-from tei.elements import Bibl, Category
+from tei.elements import Bibl, Category, Namespace
 from tei.xml import WorksFile
-
-NS: dict[str, str] = {"tei": "http://www.tei-c.org/ns/1.0"}
 
 
 class CategorySelector(list[str]):
@@ -65,7 +63,7 @@ def main() -> int:
 
     # Iterate over <bibl> elements with an xml:id but no <term> child
     for bibl_element in works.tree.xpath(
-        "//tei:bibl[@xml:id and not(tei:term)]", namespaces=NS
+        "//tei:bibl[@xml:id and not(tei:term)]", namespaces=Namespace.tei
     ):
         # Create a Work object for manipulating the <bibl> element
         bibl: Bibl = Bibl(bibl_element)
