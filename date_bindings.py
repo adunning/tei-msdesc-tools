@@ -30,41 +30,34 @@ class Binding(XMLElement):
         # print the <binding> element text
         print("".join(self.element.xpath("string()")).strip())
 
-        # Prompt the user to enter a date or mark the binding as contemporary
-        while True:
-            date_string: str = input(
-                "\nEnter ‘c’ for a contemporary binding, a date range as yyyy-yyyy, or a single year as yyyy: "
-            )
-            # if the user enters 'c', mark the binding as contemporary
-            if date_string.lower() == "c":
+        date_string: str = input(
+            "\nEnter ‘c’ for a contemporary binding, a date range as yyyy/yyyy, or a single year as yyyy: "
+        )
+
+        match date_string.lower():
+            case "c":
                 self.element.set("contemporary", "true")
                 return True
 
-            # if the user presses return, skip the element
-            elif not date_string:
-                return False
-
-            # if the user enters a single date, add this to when
-            elif date_string.isdigit():
+            case date_string if date_string.isdigit() and len(date_string) == 4:
                 self.element.set("when", date_string)
                 return True
 
-            # if the user enters a date range, add this to notBefore and notAfter
-            else:
-                # replace an en dash with a hyphen
-                date_string = date_string.replace("–", "-")
-                # split the date range into two dates
-                dates: list[str] = date_string.split("-")
-                # check that the date range is valid
+            case date_string if "/" in date_string or "-" in date_string:
+                dates: list[str] = date_string.replace("-", "/").split("/")
+
                 if len(dates) == 2 and all(
                     date.isdigit() and len(date) == 4 for date in dates
                 ):
                     self.element.set("notBefore", dates[0])
                     self.element.set("notAfter", dates[1])
                     return True
-                else:
-                    print("Invalid date range format. Please try again.")
-                    continue
+
+            case "":
+                return False
+
+        print("\nInvalid date format.\n")
+        return self.add_date()
 
 
 def main() -> int:
