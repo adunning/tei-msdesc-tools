@@ -31,14 +31,14 @@ def main() -> int:
         "-a",
         "--authority",
         dest="authority_paths",
-        nargs="*",
+        nargs="+",
         default=[
             "../medieval-mss/persons.xml",
             "../medieval-mss/places.xml",
             "../medieval-mss/works.xml",
         ],
         help="Paths to authority files",
-        type=str,
+        type=argparse.FileType('r'),
     )
     args: argparse.Namespace = parser.parse_args()
 
@@ -53,10 +53,16 @@ def main() -> int:
         for path in Collections(args.directory_path).paths
     ]
 
-    if all(results):
+    # print a summary of the results
+    # and return 0 if all keys are valid, 1 otherwise
+
+    print()
+    if all(result[0] for result in results):
+        print("All keys are valid.")
         return 0
     else:
-        print(f"{len(results) - sum(results)} errors found")
+        print("Missing keys:")
+        print(" ".join(key for result in results for key in result[1]))
         return 1
 
 

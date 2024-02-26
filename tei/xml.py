@@ -14,7 +14,7 @@ class XMLFile:
 
     def __init__(self, file_path: str) -> None:
         self.file_path: str = file_path
-        self.tree: etree.ElementTree = self.read()
+        self.tree = self.read()
 
     def read(self) -> etree.ElementTree:
         """Create an XML tree from a file."""
@@ -100,9 +100,15 @@ class Collections:
 class MSDesc(XMLFile):
     """Represents a TEI XML manuscript description."""
 
-    def check_keys(self, authority_keys: set[str]) -> bool:
-        """Returns True if every @key reference is valid, False otherwise."""
+    def check_keys(self, authority_keys: set[str]) -> tuple[bool, list[str]]:
+        """
+        Returns a tuple containing a boolean indicating
+        if every @key reference is valid,
+        and a list of keys not found in the authority files.
+        """
         keys_valid: bool = True
+        missing_keys: list[str] = []
+
         for key_elem in self.tree.xpath("//@key/parent::*"):
             line_number: int = key_elem.sourceline
             key: str = key_elem.get("key")
@@ -141,5 +147,6 @@ class MSDesc(XMLFile):
                     + "\n"
                 )
                 keys_valid = False
+                missing_keys.append(key)
 
-        return keys_valid
+        return keys_valid, missing_keys
