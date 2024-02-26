@@ -1,6 +1,5 @@
 """Classes representing TEI elements."""
 
-
 from dataclasses import dataclass, field
 
 from lxml import etree
@@ -32,12 +31,17 @@ class Category(XMLElement):
 
     def __post_init__(self) -> None:
         super().__post_init__()
-        self.catDesc = self.element.findtext("tei:catDesc", namespaces=Namespace.tei)
+        self.catDesc = self.element.findtext(
+            "tei:catDesc", namespaces=Namespace.tei
+        )
 
 
 @dataclass
 class Bibl(XMLElement):
-    """Represents a <bibl> element, with a method for adding a <term> element."""
+    """
+    Represents a <bibl> element,
+    with a method for adding a <term> element.
+    """
 
     title: str = field(default_factory=str)
 
@@ -45,9 +49,14 @@ class Bibl(XMLElement):
         super().__post_init__()
         self.title = ", ".join(
             title.text
-            for title in self.element.findall("tei:title", namespaces=Namespace.tei)
+            for title in self.element.findall(
+                "tei:title", namespaces=Namespace.tei
+            )
         )
 
     def add_term(self, category: str) -> None:
-        """Add a <term> element to a <bibl> element, with a reference to a category."""
+        """
+        Add a <term> element to a <bibl> element,
+        with a reference to a category.
+        """
         self.element.append(etree.Element("term", ref=f"#{category}"))

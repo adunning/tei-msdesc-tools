@@ -24,7 +24,10 @@ class XMLFile:
         )
 
     def write(self) -> None:
-        """Write the XML tree to the file with minimal changes to formatting."""
+        """
+        Write the XML tree to the file
+        with minimal changes to formatting.
+        """
         self.tree.write(
             self.file_path,
             encoding="utf-8",
@@ -71,7 +74,9 @@ class WorksFile(AuthorityFile):
         """Return a list of Category objects."""
         return [
             Category(category)
-            for category in self.tree.xpath("//tei:category", namespaces=Namespace.tei)
+            for category in self.tree.xpath(
+                "//tei:category", namespaces=Namespace.tei
+            )
         ]
 
 
@@ -97,7 +102,7 @@ class MSDesc(XMLFile):
 
     def check_keys(self, authority_keys: set[str]) -> bool:
         """Returns True if every @key reference is valid, False otherwise."""
-        KeysValid = True
+        keys_valid: bool = True
         for key_elem in self.tree.xpath("//@key/parent::*"):
             line_number: int = key_elem.sourceline
             key: str = key_elem.get("key")
@@ -105,20 +110,36 @@ class MSDesc(XMLFile):
             # is the key empty?
             if key == "":
                 sys.stderr.write(
-                    f"Error: empty key in {self.file_path}, line {line_number}\n"
+                    "Error: empty key in "
+                    + self.file_path
+                    + ", line "
+                    + str(line_number)
+                    + "\n"
                 )
-                KeysValid = False
+                keys_valid = False
             # is the key in the form of `prefix_1234`?
             elif not re.match(r"\w+_\d+", key):
                 sys.stderr.write(
-                    f"Error: {key} is invalid in {self.file_path}, line {line_number}\n"
+                    "Error: "
+                    + key
+                    + " is invalid in "
+                    + self.file_path
+                    + ", line "
+                    + str(line_number)
+                    + "\n"
                 )
-                KeysValid = False
+                keys_valid = False
             # is the key in the authority files?
             elif key not in authority_keys:
                 sys.stderr.write(
-                    f"Error: {key} not found in authority files in {self.file_path}, line {line_number}\n"
+                    "Error: "
+                    + key
+                    + " not found in authority files in "
+                    + self.file_path
+                    + ", line "
+                    + str(line_number)
+                    + "\n"
                 )
-                KeysValid = False
+                keys_valid = False
 
-        return KeysValid
+        return keys_valid

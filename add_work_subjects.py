@@ -10,7 +10,6 @@ Usage:
     python add_work_subjects.py [WORKS_FILE]
 """
 
-
 import argparse
 import sys
 
@@ -21,15 +20,22 @@ from tei.xml import WorksFile
 class CategorySelector(list[str]):
     """Prompt the user to select a category."""
 
-    def __call__(self, bibl_title: str, categories: list[Category]) -> list[str]:
+    def __call__(
+        self, bibl_title: str, categories: list[Category]
+    ) -> list[str]:
         """Return category IDs from the user's selection."""
         while True:
             print(f"\n{bibl_title}\n")
-            self._print_categories([category.catDesc for category in categories])
+            self._print_categories(
+                [category.catDesc for category in categories]
+            )
             selection: str = input("\nEnter one or more category numbers: ")
             try:
                 # return a list of the category IDs from the user's selection
-                return [categories[int(index) - 1].id for index in selection.split()]
+                return [
+                    categories[int(index) - 1].id
+                    for index in selection.split()
+                ]
             except ValueError:
                 print("Please enter one of more numbers.")
                 continue

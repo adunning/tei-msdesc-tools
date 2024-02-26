@@ -31,7 +31,8 @@ class Binding(XMLElement):
         print("".join(self.element.xpath("string()")).strip())
 
         date_string: str = input(
-            "\nEnter ‘c’ for a contemporary binding, a date range as yyyy/yyyy, or a single year as yyyy: "
+            "\nEnter ‘c’ for a contemporary binding, "
+            "a date range as yyyy/yyyy, or a single year as yyyy: "
         )
 
         match date_string.lower():
@@ -39,7 +40,9 @@ class Binding(XMLElement):
                 self.element.set("contemporary", "true")
                 return True
 
-            case date_string if date_string.isdigit() and len(date_string) == 4:
+            case date_string if date_string.isdigit() and len(
+                date_string
+            ) == 4:
                 self.element.set("when", date_string)
                 return True
 
@@ -79,7 +82,8 @@ def main() -> int:
         msdesc: XMLFile = XMLFile(path)
         # process all <binding> elements without a date attribute
         for binding_element in msdesc.tree.xpath(
-            "//tei:binding[not(@when) and not(@notBefore) and not(@notAfter) and not(@contemporary)]",
+            "//tei:binding[not(@when) and not(@notBefore)"
+            "and not(@notAfter) and not(@contemporary)]",
             namespaces=Namespace.tei,
         ):
             print(f"\n{msdesc.file_path}:\n")
