@@ -51,7 +51,7 @@ def main() -> int:
         authority_keys |= AuthorityFile(authority_path).keys
 
     # check keys in the manuscript descriptions
-    results: list[bool] = [
+    results: list[tuple[bool, list[str]]] = [
         MSDesc(path).check_keys(authority_keys)
         for path in Collections(args.directory_path).paths
     ]
