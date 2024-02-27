@@ -23,7 +23,7 @@ def main() -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
-        "viaf_ids",
+        dest="viaf_ids",
         nargs="+",
         help="VIAF IDs or URLs for authority entries",
         type=str,
@@ -31,19 +31,20 @@ def main() -> int:
     parser.add_argument(
         "--output",
         "-o",
+        dest="output_file_path",
         help="Output file",
         type=argparse.FileType("w"),
     )
     args = parser.parse_args()
 
-    viaf_ids: set[int] = {
+    viaf_ids: set[int] = sorted(
         (
             int(re.search(r"viaf/(\d+)", viaf_id).group(1))
             if viaf_id.startswith("http")
             else int("".join(filter(str.isdigit, viaf_id)))
         )
         for viaf_id in args.viaf_ids
-    }
+    )
     people: list[str] = []
     organizations: list[str] = []
 
@@ -61,27 +62,38 @@ def main() -> int:
                 etree.tostring(element, encoding="unicode", pretty_print=True)
             )
 
-    if args.output:
-        with open(args.output, "w", encoding="utf-8") as file:
-            if len(people) > 0:
-                file.write("<!-- People -->\n")
-                file.write("\n".join(people))
-            if len(organizations) > 0:
-                file.write("<!-- Organizations -->\n")
-                file.write("\n".join(organizations))
-    else:
-        if len(people) > 0:
-            print("<!-- People -->")
-            print("\n".join(people))
-        if len(organizations) > 0:
-            print("<!-- Organizations -->")
-            print("\n".join(organizations))
-
     if len(people) == 0 and len(organizations) == 0:
         sys.stderr.write("No authority entries were created.\n")
         return 1
+
+    # If an output file is specified, write the results to the file;
+    # otherwise, print to the console
+    if args.output_file_path:
+        output_file = args.output_file_path
     else:
-        return 0
+        output_file = sys.stdout
+
+    if len(people) > 0:
+        output_file.write("<!-- People -->\n")
+        output_file.write("\n".join(people))
+
+    if len(organizations) > 0:
+        output_file.write("<!-- Organizations -->\n")
+        output_file.write("\n".join(organizations))
+
+    if args.output_file_path:
+        output_file.close()
+
+    if len(people) == 1:
+        print("\nEntry created for 1 person.")
+    elif len(people) > 1:
+        print(f"\nEntries created for {len(people)} people.")
+    if len(organizations) == 1:
+        print("Entry created for 1 organization.")
+    elif len(organizations) > 1:
+        print(f"Entries created for {len(organizations)} organizations.")
+
+    return 0
 
 
 if __name__ == "__main__":
