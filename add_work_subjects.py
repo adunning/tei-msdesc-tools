@@ -60,6 +60,7 @@ def main() -> int:
         nargs="?",
         default="../medieval-mss/works.xml",
         help="Path to the TEI XML file containing the <bibl> elements",
+        type=argparse.FileType("r"),
     )
     args = parser.parse_args()
 

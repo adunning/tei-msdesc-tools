@@ -26,11 +26,13 @@ def main() -> int:
         "viaf_ids",
         nargs="+",
         help="VIAF IDs or URLs for authority entries",
+        type=str,
     )
     parser.add_argument(
         "--output",
         "-o",
         help="Output file",
+        type=argparse.FileType("w"),
     )
     args = parser.parse_args()
 

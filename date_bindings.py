@@ -76,6 +76,7 @@ def main() -> int:
         nargs="?",
         default="../medieval-mss/collections",
         help="Path to the directory containing the TEI XML files",
+        type=argparse.FileType("r+"),
     )
     args = parser.parse_args()
 
