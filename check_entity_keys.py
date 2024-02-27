@@ -34,7 +34,7 @@ def main() -> int:
         "-a",
         "--authority",
         dest="authority_paths",
-        nargs="+",
+        nargs="*",
         default=[
             "../medieval-mss/persons.xml",
             "../medieval-mss/places.xml",
