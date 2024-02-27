@@ -27,11 +27,11 @@ class XMLElement:
 class Category(XMLElement):
     """Represents a <category> element."""
 
-    catDesc: str = field(default_factory=str)
+    category_description: str = field(default_factory=str)
 
     def __post_init__(self) -> None:
         super().__post_init__()
-        self.catDesc = self.element.findtext(
+        self.category_description = self.element.findtext(
             "tei:catDesc", namespaces=Namespace.tei
         )
 

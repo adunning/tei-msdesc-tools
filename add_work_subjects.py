@@ -27,7 +27,7 @@ class CategorySelector(list[str]):
         while True:
             print(f"\n{bibl_title}\n")
             self._print_categories(
-                [category.catDesc for category in categories]
+                [category.category_description for category in categories]
             )
             selection: str = input("\nEnter one or more category numbers: ")
             try:
