@@ -72,7 +72,7 @@ def main() -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
-        "directory",
+        dest="directory",
         nargs="?",
         default="../medieval-mss/collections",
         help="Path to the directory containing the TEI XML files",

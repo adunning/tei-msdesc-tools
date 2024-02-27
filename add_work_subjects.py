@@ -56,7 +56,7 @@ def main() -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
-        "file",
+        dest="works_file_path",
         nargs="?",
         default="../medieval-mss/works.xml",
         help="Path to the TEI XML file containing the <bibl> elements",
@@ -64,7 +64,7 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    works = WorksFile(args.file)
+    works = WorksFile(args.works_file_path)
 
     # Iterate over <bibl> elements with an xml:id but no <term> child
     for bibl_element in works.tree.xpath(
