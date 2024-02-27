@@ -1,4 +1,6 @@
 """
+Check key references in TEI XML manuscript descriptions
+
 Verifies that every @key in TEI XML manuscript descriptions
 corresponds to an @xml:id in the authority files.
 """
@@ -11,12 +13,13 @@ from tei.xml import AuthorityFile, Collections, MSDesc
 
 def main() -> int:
     """
-    Check key references in TEI XML manuscript descriptions.
+    Main function that calls the check_keys method of the MSDesc class.
 
     Returns 0 if all keys are valid, 1 otherwise.
     """
     parser = argparse.ArgumentParser(
-        description="Check key references in TEI XML manuscript descriptions."
+        description=__doc__.strip(),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
         "-d",

@@ -68,7 +68,8 @@ def main() -> int:
     Add dates to TEI <binding> elements.
     """
     parser = argparse.ArgumentParser(
-        description="Classify dates on TEI <binding> elements"
+        description=__doc__.strip(),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
         "directory",

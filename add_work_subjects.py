@@ -5,9 +5,6 @@ Prompts the user to select a subject classification
 for each <bibl> element in the works file.
 The user's selection is added as a <term> element
 with a reference to the selected category.
-
-Usage:
-    python add_work_subjects.py [WORKS_FILE]
 """
 
 import argparse
@@ -55,7 +52,8 @@ class CategorySelector(list[str]):
 def main() -> int:
     """Prompt the user to select a category for each <bibl> element."""
     parser = argparse.ArgumentParser(
-        description="Add subject classifications to TEI <bibl> elements"
+        description=__doc__.strip(),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
         "file",
