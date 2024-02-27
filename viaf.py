@@ -41,6 +41,18 @@ class VIAF:
         try:
             response = requests.get(url, timeout=10)
             response.raise_for_status()
+            if (
+                response.json().get("ns0")
+                == "http://viaf.org/viaf/abandonedViafRecord"
+            ):
+                sys.stderr.write(
+                    f"VIAF ID {self.viaf_id} is a redirect to "
+                    f"{response.json().get('redirect').get('directto')}\n"
+                )
+                self.viaf_id = int(
+                    response.json().get("redirect").get("directto")
+                )
+                return self.fetch_data()
             return response.json()
         except requests.exceptions.RequestException as err:
             if response.status_code == 404:
@@ -154,6 +166,17 @@ class VIAF:
             death = etree.SubElement(element, "death")
             death.set("source", "VIAF")
             death.set("when", self.data.get("deathDate"))
+
+        # Add leading zeroes to the birth/death year if less than 4 digits
+        for date in element.iter("birth", "death"):
+            date.set(
+                "when",
+                re.sub(
+                    r"^(\d+)(-|$)",
+                    lambda match: match.group(1).zfill(4) + match.group(2),
+                    date.get("when"),
+                ),
+            )
 
         # Record the sex of the person
         if self.data.get("fixed").get("gender") != "u":

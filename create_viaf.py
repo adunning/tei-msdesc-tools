@@ -1,5 +1,5 @@
 """
-Create authority entries in TEI XML format based on a VIAF ID.
+Create authority entries in TEI XML format from VIAF IDs
 """
 
 import argparse
@@ -13,10 +13,14 @@ from viaf import VIAF
 
 def main() -> int:
     """
-    Create TEI XML authority entries based on VIAF IDs.
+    Main function that processes VIAF IDs and generates XML output.
+
+    Returns:
+        int: The exit code (0 for success, 1 for failure)
     """
     parser = argparse.ArgumentParser(
-        description="Create TEI XML authority entries based on VIAF IDs."
+        description=__doc__.strip(),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
         "viaf_ids",
@@ -71,7 +75,11 @@ def main() -> int:
             print("<!-- Organizations -->")
             print("\n".join(organizations))
 
-    return 0
+    if len(people) == 0 and len(organizations) == 0:
+        sys.stderr.write("No authority entries were created.\n")
+        return 1
+    else:
+        return 0
 
 
 if __name__ == "__main__":
