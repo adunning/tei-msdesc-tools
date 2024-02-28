@@ -369,6 +369,8 @@ class VIAF:
                 variant_element.set("subtype", "surnameFirst")
             # print each of the subfields within a <name> element
             for subfield in heading["subfields"]:
+                if not subfield["code"].isalpha():
+                    continue
                 name_element = etree.SubElement(variant_element, "name")
                 name_element.set("type", f"marc-{subfield["code"]}")
                 name_element.text = subfield["text"]
@@ -393,6 +395,8 @@ class VIAF:
                     variant_element.set("subtype", "surnameFirst")
                 # print each of the subfields within a <name> element
                 for subfield in name["subfields"]:
+                    if not subfield["code"].isalpha():
+                        continue
                     name_element = etree.SubElement(variant_element, "name")
                     name_element.set("type", f"marc-{subfield["code"]}")
                     name_element.text = subfield["text"]
