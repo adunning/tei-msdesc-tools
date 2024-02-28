@@ -26,26 +26,26 @@ class VIAF:
 
     viaf_id: int
     name_type: str = field(default_factory=str)
-    sources: list = field(default_factory=list)
-    headings: list = field(default_factory=list)
+    sources: list[dict[str, str]] = field(default_factory=list)
+    headings: list[dict[str, str]] = field(default_factory=list)
     headings_structured: list = field(default_factory=list)
     name_variants: list = field(default_factory=list)
     birth_date: str = field(default_factory=str)
     death_date: str = field(default_factory=str)
     date_type: str = field(default_factory=str)
     gender: str = field(default_factory=str)
-    languages: list = field(default_factory=list)
-    nationalities: list = field(default_factory=list)
-    occupations: list = field(default_factory=list)
+    languages: list[dict[str, str]] = field(default_factory=list)
+    nationalities: list[dict[str, str]] = field(default_factory=list)
+    occupations: list[dict[str, str]] = field(default_factory=list)
 
-    def __post_init__(self) -> None:
+    def __post_init__(self):
         if not re.match(r"[1-9]\d(\d{0,7}|\d{17,20})", str(self.viaf_id)):
             sys.stderr.write("VIAF ID is invalid.")
             return
         self.data = self.fetch_data()
         self.parse_data()
 
-    def fetch_data(self) -> dict[str, any]:
+    def fetch_data(self) -> dict[str, str]:
         """
         Retrieves data from VIAF API based on the VIAF ID.
         """
@@ -65,31 +65,37 @@ class VIAF:
                     response.json()["redirect"]["directto"]
                 )
                 return self.fetch_data()
-            return response.json()
         except requests.exceptions.RequestException as err:
             if response.status_code == 404:
                 sys.stderr.write(f"VIAF ID does not exist: {self.viaf_id}\n")
-                self.viaf_id = None
-                return
+                self.viaf_id = 0
             else:
                 sys.stderr.write(f"Request Exception: {err}")
-                return
 
-    def format_date(self, date: str) -> str:
+        return response.json()
+
+    def format_date(self, date: str) -> str | None:
         """
         Formats the date by adding leading zeroes to the year
         if less than 4 digits.
         """
-        date = re.sub(
-            r"^(\d+)(-|$)",
-            lambda match: match.group(1).zfill(4) + match.group(2),
-            date,
-        )
-        if date == "0000":
+        if date == "0000" or date == "0":
             return None
+        elif date.startswith("-"):
+            date = re.sub(
+                r"^(-?\d+)(-|$)",
+                lambda match: match.group(1).zfill(5) + match.group(2),
+                date,
+            )
+        else:
+            date = re.sub(
+                r"^(\d+)(-|$)",
+                lambda match: match.group(1).zfill(4) + match.group(2),
+                date,
+            )
         return date
 
-    def parse_data(self) -> None:
+    def parse_data(self):
         """
         Parses the data retrieved from the VIAF API.
         """
@@ -98,7 +104,7 @@ class VIAF:
 
         self.name_type = self.data["nameType"]
 
-        if self.data.get("sources") is not None:
+        if self.data.get("sources"):
             # If there is only one source, convert it to a list
             if isinstance(self.data.get("sources")["source"], dict):
                 self.data.get("sources")["source"] = [
@@ -113,7 +119,7 @@ class VIAF:
                     {"name": source_name, "id": source_id}
                 )
 
-        if self.data.get("mainHeadings") is not None:
+        if self.data.get("mainHeadings"):
             if isinstance(self.data.get("mainHeadings")["data"], dict):
                 self.data.get("mainHeadings")["data"] = [
                     self.data.get("mainHeadings").get("data")
@@ -137,7 +143,7 @@ class VIAF:
                     }
                 )
 
-        if self.data.get("mainHeadings")["mainHeadingEl"] is not None:
+        if self.data.get("mainHeadings")["mainHeadingEl"]:
             if isinstance(
                 self.data.get("mainHeadings")["mainHeadingEl"], dict
             ):
@@ -171,11 +177,11 @@ class VIAF:
                     }
                 )
 
-        if self.data.get("x400s") is not None:
+        if self.data.get("x400s"):
             if isinstance(self.data.get("x400s")["x400"], dict):
                 self.data.get("x400s")["x400"] = [
                     self.data.get("x400s").get("x400")
-                    ]
+                ]
             for heading in self.data.get("x400s")["x400"]:
                 for subfield in heading["datafield"]["subfield"]:
                     if isinstance(heading["datafield"]["subfield"], dict):
@@ -217,7 +223,7 @@ class VIAF:
             gender_type = None
         self.gender = gender_type
 
-        if self.data.get("languageOfEntity") is not None:
+        if self.data.get("languageOfEntity"):
             if isinstance(self.data.get("languageOfEntity")["data"], dict):
                 self.data.get("languageOfEntity")["data"] = [
                     self.data.get("languageOfEntity").get("data")
@@ -230,7 +236,7 @@ class VIAF:
                     }
                 )
 
-        if self.data.get("nationalityOfEntity") is not None:
+        if self.data.get("nationalityOfEntity"):
             if isinstance(self.data.get("nationalityOfEntity")["data"], dict):
                 self.data.get("nationalityOfEntity")["data"] = [
                     self.data.get("nationalityOfEntity").get("data")
@@ -243,7 +249,7 @@ class VIAF:
                     }
                 )
 
-        if self.data.get("occupation") is not None:
+        if self.data.get("occupation"):
             if isinstance(self.data.get("occupation")["data"], dict):
                 self.data.get("occupation")["data"] = [
                     self.data.get("occupation").get("data")
@@ -272,8 +278,8 @@ class VIAF:
             element_name: str = "person"
             element_id: str = f"person_{self.viaf_id}"
         elif self.name_type == "Corporate":
-            element_name: str = "org"
-            element_id: str = f"org_{self.viaf_id}"
+            element_name = "org"
+            element_id = f"org_{self.viaf_id}"
 
         # Set the element id
         element = etree.Element(
@@ -331,95 +337,112 @@ class VIAF:
             " ".join(display_heading["sources"])
             if isinstance(display_heading["sources"], list)
             else display_heading["sources"]
-            )
+        )
         display_element.set("type", "display")
         display_element.text = display_heading["text"]
 
-        # Provide structured name variants from headings
-        for heading in self.headings_structured:
+        # Create filtered lists of the structured headings and name variants
+        headings_preferred = [
+            heading
+            for heading in self.headings_structured
+            if any(source in heading["sources"]
+                   for source in ["LC", "DNB", "BNF", "BAV", "JPG"])
+        ]
+        variants_preferred = [
+            variant
+            for variant in self.name_variants
+            if any(source in variant["sources"]
+                   for source in ["LC", "DNB", "BNF", "BAV", "JPG"])
+        ]
+
+        # Add a normalized string to each list from the subfields
+        for heading in headings_preferred + variants_preferred:
+            heading["normalized"] = " ".join(
+                subfield["text"]
+                for subfield in heading["subfields"]
+                if subfield["code"].isalpha()
+            ).strip()
+
+        for heading in headings_preferred + variants_preferred:
+            heading["normalized"] = "".join(
+                char for char in heading["normalized"] if char.isalpha()
+            )
+
+        # Deduplicate headings_preferred as structured_names
+        structured_names = []
+        normalized_strings = set()
+        for heading in headings_preferred:
+            normalized_string = heading["normalized"]
+            if normalized_string not in normalized_strings:
+                structured_names.append(heading)
+                normalized_strings.add(normalized_string)
+        # Add the name variants to the structured names
+        for variant in variants_preferred:
+            normalized_string = variant["normalized"]
+            if normalized_string not in normalized_strings:
+                structured_names.append(variant)
+                normalized_strings.add(normalized_string)
+
+        # Encode structured name variants
+        for name in structured_names:
             if element_name == "person":
                 variant_element = etree.SubElement(element, "persName")
             elif element_name == "org":
                 variant_element = etree.SubElement(element, "orgName")
             variant_element.set(
                 "source",
-                " ".join(heading["sources"])
-                if isinstance(heading["sources"], list)
-                else heading["sources"]
-                )
+                " ".join(name["sources"])
+                if isinstance(name["sources"], list)
+                else name["sources"]
+            )
             variant_element.set("type", "variant")
-            if heading["ind1"] == "0":
+            if name["ind1"] == "0":
                 variant_element.set("subtype", "forenameFirst")
-            elif heading["ind1"] == "1":
+            elif name["ind1"] == "1":
                 variant_element.set("subtype", "surnameFirst")
             # print each of the subfields within a <name> element
-            for subfield in heading["subfields"]:
+            for subfield in name["subfields"]:
                 if not subfield["code"].isalpha():
                     continue
                 name_element = etree.SubElement(variant_element, "name")
                 name_element.set("type", f"marc-{subfield["code"]}")
                 name_element.text = subfield["text"]
 
-        # Provide structured name variants from x400s
-        if self.name_variants is not None:
-            for name in self.name_variants:
-                if element_name == "person":
-                    variant_element = etree.SubElement(element, "persName")
-                elif element_name == "org":
-                    variant_element = etree.SubElement(element, "orgName")
-                variant_element.set(
-                    "source",
-                    " ".join(name["sources"])
-                    if isinstance(name["sources"], list)
-                    else name["sources"]
-                    )
-                variant_element.set("type", "variant")
-                if name["ind1"] == "0":
-                    variant_element.set("subtype", "forenameFirst")
-                elif name["ind1"] == "1":
-                    variant_element.set("subtype", "surnameFirst")
-                # print each of the subfields within a <name> element
-                for subfield in name["subfields"]:
-                    if not subfield["code"].isalpha():
-                        continue
-                    name_element = etree.SubElement(variant_element, "name")
-                    name_element.set("type", f"marc-{subfield["code"]}")
-                    name_element.text = subfield["text"]
-
         # Set the birth and death dates
         if self.date_type == "lived":
-            if self.birth_date is not None:
+            if self.birth_date:
                 birth = etree.SubElement(element, "birth")
                 birth.set("source", "VIAF")
                 birth.set("when", self.birth_date)
-            if self.death_date is not None:
+            if self.death_date:
                 death = etree.SubElement(element, "death")
                 death.set("source", "VIAF")
                 death.set("when", self.death_date)
         elif self.date_type == "circa":
-            if self.birth_date is not None:
+            if self.birth_date:
                 birth = etree.SubElement(element, "birth")
                 birth.set("cert", "low")
                 birth.set("source", "VIAF")
                 birth.set("when", self.birth_date)
-            if self.death_date is not None:
+            if self.death_date:
                 death = etree.SubElement(element, "death")
                 death.set("cert", "low")
                 death.set("source", "VIAF")
                 death.set("when", self.death_date)
         elif self.date_type == "flourished":
-            if self.birth_date is not None:
-                flourished = etree.SubElement(element, "floruit")
-                flourished.set("source", "VIAF")
+            flourished = etree.SubElement(element, "floruit")
+            flourished.set("source", "VIAF")
+            if self.birth_date:
                 flourished.set("notBefore", self.birth_date)
+            if self.death_date:
                 flourished.set("notAfter", self.death_date)
 
-        if self.gender is not None:
+        if self.gender:
             sex = etree.SubElement(element, "sex")
             sex.set("source", "VIAF")
             sex.text = self.gender
 
-        if self.languages is not None:
+        if self.languages:
             for language in self.languages:
                 language_element = etree.SubElement(element, "langKnown")
                 language_element.set(
@@ -430,7 +453,7 @@ class VIAF:
                 )
                 language_element.set("tag", language["language"])
 
-        if self.nationalities is not None:
+        if self.nationalities:
             for nationality in self.nationalities:
                 nationality_element = etree.SubElement(element, "nationality")
                 nationality_element.set(
@@ -441,7 +464,7 @@ class VIAF:
                 )
                 nationality_element.text = nationality["nationality"]
 
-        if self.occupations is not None:
+        if self.occupations:
             for occupation in self.occupations:
                 occupation_element = etree.SubElement(element, "occupation")
                 occupation_element.set(
@@ -498,6 +521,7 @@ class VIAF:
         viaf_title.text = "VIAF"
 
         # Sort the resulting list of links by title
-        link_list[:] = sorted(link_list, key=lambda item: item[0][0].text)
+        link_list[:] = sorted(
+            link_list, key=lambda item: item[0][0].text or "")
 
         return element
