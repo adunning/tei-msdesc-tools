@@ -150,6 +150,10 @@ class VIAF:
                         heading["datafield"]["subfield"] = [
                             heading["datafield"]["subfield"]
                         ]
+                # Remove trailing punctuation from subfields
+                for subfield in heading["datafield"]["subfield"]:
+                    if subfield["#text"].endswith((".", ",")):
+                        subfield["#text"] = subfield["#text"][:-1]
                 self.headings_structured.append(
                     {
                         "dtype": heading["datafield"]["@dtype"],
@@ -178,6 +182,10 @@ class VIAF:
                         heading["datafield"]["subfield"] = [
                             heading["datafield"]["subfield"]
                         ]
+                # Remove trailing punctuation from subfields
+                for subfield in heading["datafield"]["subfield"]:
+                    if subfield["#text"].endswith((".", ",")):
+                        subfield["#text"] = subfield["#text"][:-1]
                 self.name_variants.append(
                     {
                         "dtype": heading["datafield"]["@dtype"],
@@ -273,82 +281,59 @@ class VIAF:
         )
         element.set("{http://www.w3.org/XML/1998/namespace}id", element_id)
 
-        # Provide name variant headings
-        for heading in self.headings:
-            if element_name == "person":
-                variant_element = etree.SubElement(element, "persName")
-            elif element_name == "org":
-                variant_element = etree.SubElement(element, "orgName")
+        # Find a display heading by looking for a preferred source
+        display_heading = next(
+            (
+                heading
+                for heading in self.headings
+                if "LC" in heading["sources"]
+            ),
+            None,
+        )
+        if display_heading is None:
+            display_heading = next(
+                (
+                    heading
+                    for heading in self.headings
+                    if "DNB" in heading["sources"]
+                ),
+                None,
+            )
+        if display_heading is None:
+            display_heading = next(
+                (
+                    heading
+                    for heading in self.headings
+                    if "BNF" in heading["sources"]
+                    or "SUDOC" in heading["sources"]
+                    or "BIBSYS" in heading["sources"]
+                    or "NTA" in heading["sources"]
+                    or "JPG" in heading["sources"]
+                ),
+                None,
+            )
+        # If there is no preferred source, use the one with the most sources
+        if display_heading is None:
+            display_heading = max(
+                self.headings, key=lambda heading: len(heading["sources"])
+            )
+        # If there is still no display heading, use the first one
+        if display_heading is None:
+            display_heading = self.headings[0]
 
-            # Set the source of the variant name
-            variant_element.set(
-                "source",
-                " ".join(heading["sources"])
-                if isinstance(heading["sources"], list)
-                else heading["sources"]
-                )
-            variant_element.set("type", "variant")
-            variant_element.text = heading["text"]
-
-        # Set the display form for the persName or orgName element
-        display_form_set: bool = False
-        # Prefer the LC source for the display form
-        for variant_element in element.iter("persName", "orgName"):
-            sources: list[str] = variant_element.get("source").split(" ")
-            if "LC" in sources:
-                variant_element.set("type", "display")
-                display_form_set = True
-
-        # If there is no LC source, use the DNB source
-        if not display_form_set:
-            for variant_element in element.iter("persName", "orgName"):
-                sources: list[str] = variant_element.get("source").split(" ")
-                if "DNB" in sources:
-                    variant_element.set("type", "display")
-                    display_form_set = True
-
-        if not display_form_set:
-            for variant_element in element.iter("persName", "orgName"):
-                sources: list[str] = variant_element.get("source").split(" ")
-                if any(
-                    source in sources for source
-                        in ["BNF", "SUDOC", "JPG"]):
-                    variant_element.set("type", "display")
-                    display_form_set = True
-
-        # If there is no preferred source, use the entry with the most sources
-        if not display_form_set:
-            max_sources = 0
-
-            for variant_element in element.iter("persName", "orgName"):
-                sources: list[str] = variant_element.get("source").split(" ")
-
-                if len(sources) > max_sources:
-                    max_sources = len(sources)
-                    variant_element.set("type", "display")
-                    display_form_set = True
-                elif len(sources) == max_sources:
-                    display_form_set = False
-
-        # If no name has been set as the display form, use the first one
-        if not display_form_set:
-            for variant_element in element.iter("persName", "orgName"):
-                variant_element.set("type", "display")
-                break
-
-        # Sort name variants placing the display form first
-        # element[:] = sorted(
-        #     element,
-        #     key=lambda variant: (
-        #         variant.get("type") != "display",
-        #         variant.text,
-        #     ),
-        # )
-
-        # Delete all name variants that are not the display form
-        for variant_element in element.iter("persName", "orgName"):
-            if variant_element.get("type") != "display":
-                element.remove(variant_element)
+        # Add the display heading to the element
+        if element_name == "person":
+            display_element = etree.SubElement(element, "persName")
+        elif element_name == "org":
+            display_element = etree.SubElement(element, "orgName")
+        display_element.set(
+            "source",
+            " ".join(display_heading["sources"])
+            if isinstance(display_heading["sources"], list)
+            else display_heading["sources"]
+            )
+        display_element.set("type", "display")
+        display_element.text = display_heading["text"]
 
         # Provide structured name variants from headings
         for heading in self.headings_structured:

@@ -37,14 +37,19 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    viaf_ids: list[int] = sorted(
-        (
-            int(re.search(r"viaf/(\d+)", viaf_id).group(1))
-            if re.search(r"viaf/(\d+)", viaf_id) is not None else 0
-            if viaf_id.startswith("http")
-            else int("".join(filter(str.isdigit, viaf_id)))
+    viaf_ids: set[int] = set(
+        sorted(
+            (
+                int(re.search(r"viaf/(\d+)", viaf_id).group(1))
+                if re.search(r"viaf/(\d+)", viaf_id) is not None
+                else (
+                    0
+                    if viaf_id.startswith("http")
+                    else int("".join(filter(str.isdigit, viaf_id)))
+                )
+            )
+            for viaf_id in args.viaf_ids
         )
-        for viaf_id in args.viaf_ids
     )
     people: list[str] = []
     organizations: list[str] = []
