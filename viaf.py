@@ -82,14 +82,21 @@ class VIAF:
                 response.json().get("ns0")
                 == "http://viaf.org/viaf/abandonedViafRecord"
             ):
-                sys.stderr.write(
-                    f"VIAF ID {self.viaf_id} is a redirect to "
-                    f"{response.json()['redirect']['directto']}\n"
-                )
-                self.viaf_id = int(
-                    response.json()["redirect"]["directto"]
-                )
-                return self.fetch_data()
+                if response.json()["scavenged"]:
+                    sys.stderr.write(
+                        f"VIAF ID {self.viaf_id} is a deleted record.\n"
+                    )
+                    self.viaf_id = 0
+                    return None
+                elif response.json()["redirect"]:
+                    sys.stderr.write(
+                        f"VIAF ID {self.viaf_id} is a redirect to "
+                        f"{response.json()["redirect"]["directto"]}.\n"
+                    )
+                    self.viaf_id = int(
+                        response.json()["redirect"]["directto"]
+                    )
+                    return self.fetch_data()
         except requests.exceptions.RequestException as err:
             if response.status_code == 404:
                 sys.stderr.write(f"VIAF ID does not exist: {self.viaf_id}\n")
