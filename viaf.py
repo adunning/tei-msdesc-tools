@@ -1,5 +1,20 @@
 """
-Module for working with VIAF data.
+VIAF (Virtual International Authority File) data class.
+
+This module contains a data class representing a VIAF (Virtual International
+Authority File) entity. The class retrieves data from the VIAF API based on the
+VIAF ID and parses the data into a structured format. The class also provides
+a method to create a TEI XML element based on the VIAF data.
+
+Example:
+    To create a VIAF entity based on a VIAF ID and create a TEI XML element
+    based on the VIAF data:
+
+    >>> viaf = VIAF(123456789)
+    >>> element = viaf.create_element()
+    >>> print(etree.tostring(element, pretty_print=True).decode("utf-8"))
+
+    This will output the TEI XML element representing the VIAF entity.
 """
 
 import re
@@ -16,12 +31,22 @@ class VIAF:
     Class representing a VIAF (Virtual International Authority File) entity.
 
     Attributes:
-        viaf_id (int): The VIAF ID of the entity.
-        data (dict): The data retrieved from the VIAF API.
+        viaf_id (int): The VIAF ID.
+        name_type (str): The type of name (Personal or Corporate).
+        sources (list[dict[str, str]]): The sources of the entity.
+        headings (list[dict[str, str]]): The main headings of the entity.
+        headings_structured (list): The structured main headings of the entity.
+        name_variants (list): The name variants of the entity.
+        birth_date (str): The birth date of the entity.
+        death_date (str): The death date of the entity.
+        date_type (str): The type of date (lived, circa, or flourished).
 
     Methods:
-        fetch_data(self): Retrieves data from the VIAF API.
-        create_element(self): Creates an XML element based on the VIAF data.
+        fetch_data: Retrieves data from VIAF API based on the VIAF ID.
+        format_date: Formats the date by adding leading zeroes to the year
+            if less than 4 digits.
+        parse_data: Parses the data retrieved from the VIAF API.
+        create_element: Create an XML element based on the VIAF data.
     """
 
     viaf_id: int
