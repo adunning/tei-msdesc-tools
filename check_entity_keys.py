@@ -1,8 +1,11 @@
-"""
-Check key references in TEI XML manuscript descriptions
+"""Check key references in TEI XML manuscript descriptions.
 
-Verifies that every @key in TEI XML manuscript descriptions
-corresponds to an @xml:id in the authority files.
+This script checks the key references in TEI XML manuscript descriptions
+against authority files and prints a summary of the results.
+
+Examples:
+    $ python check_entity_keys.py
+    $ python check_entity_keys.py -d ../medieval-mss/collections
 """
 
 import argparse
@@ -41,7 +44,7 @@ def main() -> int:
             "../medieval-mss/works.xml",
         ],
         help="Paths to authority files",
-        type=argparse.FileType('r'),
+        type=argparse.FileType("r"),
     )
     args: argparse.Namespace = parser.parse_args()
 

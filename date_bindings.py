@@ -1,10 +1,12 @@
-"""
-Classify dates on TEI <binding> elements
+"""Classify dates on TEI <binding> elements.
 
-All <binding> elements in TEI manuscript descriptions must have an attribute
-to provide an approximate date range for the binding.
-This script prompts the user to date <binding> elements without attributes
-by marking them as contemporary or entering a date range.
+This script processes TEI XML files and prompts the user to classify
+the date of each <binding> element. The user can classify the date as
+contemporary, a single year, or a date range.
+
+Examples:
+    $ python date_bindings.py
+    $ python date_bindings.py -d ../medieval-mss/collections
 """
 
 import argparse
@@ -64,8 +66,10 @@ class Binding(XMLElement):
 
 
 def main() -> int:
-    """
-    Add dates to TEI <binding> elements.
+    """Add dates to TEI <binding> elements.
+
+    Returns:
+        int: The exit code (0 for success, 1 for failure)
     """
     parser = argparse.ArgumentParser(
         description=__doc__.strip(),
@@ -76,7 +80,7 @@ def main() -> int:
         nargs="?",
         default="../medieval-mss/collections",
         help="Path to the directory containing the TEI XML files",
-        type=argparse.FileType("r+"),
+        type=str,
     )
     args = parser.parse_args()
 

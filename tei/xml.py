@@ -1,4 +1,36 @@
-"""Classes for manipulating TEI XML files."""
+"""Classes for manipulating TEI XML files.
+
+Classes:
+    XMLFile: Represents an XML file, with methods for reading and writing.
+    AuthorityFile: Represents an authority file such as `persons.xml`.
+    WorksFile: Represents the works file.
+    Collections: Represents a directory of TEI XML manuscript descriptions.
+    MSDesc: Represents a TEI XML manuscript description.
+
+Examples:
+    To read an authority file, works file, collections,
+    and a manuscript description:
+
+    >>> authority_file = AuthorityFile("persons.xml")
+    >>> print(authority_file.keys)
+
+    To read a works file and get a list of categories:
+
+    >>> works_file = WorksFile("works.xml")
+    >>> print(works_file.categories)
+
+    To read a directory of manuscript descriptions
+    and get a list of file paths:
+
+    >>> collections = Collections("manuscripts")
+    >>> print(collections.paths)
+
+    To read a manuscript description and check
+    if every @key reference is valid:
+
+    >>> ms_desc = MSDesc("manuscripts/MS-001.xml")
+    >>> print(ms_desc.check_keys(authority_file.keys))
+"""
 
 import os
 import re
@@ -10,7 +42,23 @@ from tei.elements import Category, Namespace
 
 
 class XMLFile:
-    """Represents an XML file, with methods for reading and writing."""
+    """Represents an XML file, with modifications to reduce formatting changes.
+
+    Attributes:
+        file_path (str): The file path.
+        tree (etree.ElementTree): The XML tree.
+
+    Methods:
+        read: Create an XML tree from a file.
+        write: Write the XML tree to the file with minimal formatting changes.
+        _fix_xml_declaration: Correct single quotes in lxml's XML declaration.
+
+    Examples:
+        To read an XML file and write it back to the file:
+
+        >>> xml_file = XMLFile("file.xml")
+        >>> xml_file.write()
+    """
 
     def __init__(self, file_path: str) -> None:
         self.file_path: str = file_path
@@ -24,10 +72,7 @@ class XMLFile:
         )
 
     def write(self) -> None:
-        """
-        Write the XML tree to the file
-        with minimal changes to formatting.
-        """
+        """Write the XML tree to the file."""
         self.tree.write(
             self.file_path,
             encoding="utf-8",
@@ -47,7 +92,19 @@ class XMLFile:
 
 
 class AuthorityFile(XMLFile):
-    """Represents an authority file (persons.xml, places.xml, or works.xml)."""
+    """Represents an authority file (persons.xml, places.xml, or works.xml).
+
+    Attributes:
+        keys (set[str]): A set of all xml:id attributes on <person>, <place>,
+        <org>, and <bibl> elements.
+
+    Examples:
+        To get a set of all xml:id attributes on <person>, <place>, <org>,
+        and <bibl> elements:
+
+        >>> authority_file = AuthorityFile("persons.xml")
+        >>> print(authority_file.keys)
+    """
 
     @property
     def keys(self) -> set[str]:
@@ -67,7 +124,17 @@ class AuthorityFile(XMLFile):
 
 
 class WorksFile(AuthorityFile):
-    """Represents the works file."""
+    """Represents the works file.
+
+    Attributes:
+        categories (list[Category]): A list of Category objects.
+
+    Examples:
+        To get a list of Category objects:
+
+        >>> works_file = WorksFile("works.xml")
+        >>> print(works_file.categories)
+    """
 
     @property
     def categories(self) -> list[Category]:
@@ -81,7 +148,14 @@ class WorksFile(AuthorityFile):
 
 
 class Collections:
-    """Represents a directory of TEI XML manuscript descriptions."""
+    """Represents a directory of TEI XML manuscript descriptions.
+
+    Attributes:
+        directory_path (str): The directory path.
+
+    Methods:
+        paths: Returns a list of XML files in the directory.
+    """
 
     def __init__(self, directory_path: str) -> None:
         self.directory_path: str = directory_path
@@ -98,13 +172,43 @@ class Collections:
 
 
 class MSDesc(XMLFile):
-    """Represents a TEI XML manuscript description."""
+    """Represents a TEI XML manuscript description.
+
+    Methods:
+        check_keys: Check if every @key reference is valid.
+    """
 
     def check_keys(self, authority_keys: set[str]) -> tuple[bool, list[str]]:
-        """
+        """Check if every @key reference is valid.
+
         Returns a tuple containing a boolean indicating
         if every @key reference is valid,
         and a list of keys not found in the authority files.
+
+        Args:
+            authority_keys (set[str]): A set of all xml:id attributes
+            on <person>, <place>, <org>, and <bibl> elements.
+
+        Returns:
+            tuple[bool, list[str]]: A tuple containing a boolean indicating
+            if every @key reference is valid,
+            and a list of keys not found in the authority files.
+
+        Examples:
+            To check if @key references are valid:
+
+            >>> ms_desc = MSDesc("manuscripts/MS-001.xml")
+            >>> print(ms_desc.check_keys(authority_file.keys))
+
+            Returns a tuple containing a boolean indicating
+            if every @key reference is valid,
+            and a list of keys not found in the authority files.
+
+            >>> (True, [])
+
+            or
+
+            >>> (False, ["person_1234", "place_5678"])
         """
         keys_valid: bool = True
         missing_keys: list[str] = []

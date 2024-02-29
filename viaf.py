@@ -1,5 +1,4 @@
-"""
-VIAF (Virtual International Authority File) data class.
+"""VIAF (Virtual International Authority File) data class.
 
 This module contains a data class representing a VIAF (Virtual International
 Authority File) entity. The class retrieves data from the VIAF API based on the
@@ -10,7 +9,7 @@ Example:
     To create a VIAF entity based on a VIAF ID and create a TEI XML element
     based on the VIAF data:
 
-    >>> viaf = VIAF(123456789)
+    >>> viaf = VIAF(34512366)
     >>> element = viaf.create_element()
     >>> print(etree.tostring(element, pretty_print=True).decode("utf-8"))
 
@@ -27,8 +26,7 @@ from lxml import etree
 
 @dataclass
 class VIAF:
-    """
-    Class representing a VIAF (Virtual International Authority File) entity.
+    """Represents a VIAF entity.
 
     Attributes:
         viaf_id (int): The VIAF ID.
@@ -49,7 +47,7 @@ class VIAF:
         create_element: Create an XML element based on the VIAF data.
     """
 
-    viaf_id: int
+    viaf_id: int | None
     name_type: str = field(default_factory=str)
     sources: list[dict[str, str]] = field(default_factory=list)
     headings: list[dict[str, str]] = field(default_factory=list)
@@ -70,10 +68,8 @@ class VIAF:
         self.data = self.fetch_data()
         self.parse_data()
 
-    def fetch_data(self) -> dict[str, str]:
-        """
-        Retrieves data from VIAF API based on the VIAF ID.
-        """
+    def fetch_data(self) -> dict[str, str] | None:
+        """Retrieves data from VIAF API based on the VIAF ID."""
         url = f"https://www.viaf.org/viaf/{self.viaf_id}/viaf.json"
         try:
             response = requests.get(url, timeout=10)
@@ -86,7 +82,7 @@ class VIAF:
                     sys.stderr.write(
                         f"VIAF ID {self.viaf_id} is a deleted record.\n"
                     )
-                    self.viaf_id = 0
+                    self.viaf_id = None
                     return None
                 elif response.json()["redirect"]:
                     sys.stderr.write(
@@ -100,17 +96,14 @@ class VIAF:
         except requests.exceptions.RequestException as err:
             if response.status_code == 404:
                 sys.stderr.write(f"VIAF ID does not exist: {self.viaf_id}\n")
-                self.viaf_id = 0
+                self.viaf_id = None
             else:
                 sys.stderr.write(f"Request Exception: {err}")
 
         return response.json()
 
     def format_date(self, date: str) -> str | None:
-        """
-        Formats the date by adding leading zeroes to the year
-        if less than 4 digits.
-        """
+        """Ensures that the year is 4 digits long for ISO 8601."""
         if date == "0000" or date == "0":
             return None
         elif date.startswith("-"):
@@ -128,9 +121,7 @@ class VIAF:
         return date
 
     def parse_data(self):
-        """
-        Parses the data retrieved from the VIAF API.
-        """
+        """Parses the data retrieved from the VIAF API."""
         if self.data is None:
             return
 
@@ -295,8 +286,7 @@ class VIAF:
                 )
 
     def create_element(self) -> etree.Element:
-        """
-        Create an XML element based on the VIAF data.
+        """Create an XML element based on the VIAF data.
 
         Returns:
             etree.Element: The XML element representing the VIAF entity.

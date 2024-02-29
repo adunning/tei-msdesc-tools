@@ -1,10 +1,18 @@
-"""
-Add subject classifications to TEI <bibl> elements
+"""Add subject classifications to TEI <bibl> elements
 
-Prompts the user to select a subject classification
-for each <bibl> element in the works file.
-The user's selection is added as a <term> element
-with a reference to the selected category.
+This script prompts the user to select one or more subject classifications for
+each <bibl> element in a TEI XML file. The selected classifications are added
+as <term> elements within the <bibl> elements.
+
+Examples:
+    $ python add_work_subjects.py ../medieval-mss/works.xml
+    $ python add_work_subjects.py -h
+
+Attributes:
+    works_file_path (str): Path to the TEI XML works file
+
+Returns:
+    int: The exit code (0 for success, 1 for failure)
 """
 
 import argparse
@@ -15,12 +23,29 @@ from tei.xml import WorksFile
 
 
 class CategorySelector(list[str]):
-    """Prompt the user to select a category."""
+    """Prompt the user to select a category.
+
+    Attributes:
+        bibl_title (str): The title of the <bibl> element
+        categories (list[Category]): The available categories
+
+    Methods:
+        __call__: Prompt the user for input and return the selected categories
+        _print_categories: Print the available categories in rows of three
+    """
 
     def __call__(
         self, bibl_title: str, categories: list[Category]
     ) -> list[str]:
-        """Return category IDs from the user's selection."""
+        """Return category IDs from the user's selection.
+
+        Args:
+            bibl_title (str): The title of the <bibl> element
+            categories (list[Category]): The available categories
+
+        Returns:
+            list[str]: The selected category IDs
+        """
         while True:
             print(f"\n{bibl_title}\n")
             self._print_categories(
@@ -41,7 +66,11 @@ class CategorySelector(list[str]):
                 continue
 
     def _print_categories(self, category_descriptions: list[str]) -> None:
-        """Print the available categories in rows of three."""
+        """Print the available categories in rows of three.
+
+        Args:
+            category_descriptions (list[str]): Category descriptions
+        """
         for index, description in enumerate(category_descriptions, start=1):
             print(f"{index:>2}. {description:<25}", end="")
             # print a newline after every third category
@@ -50,7 +79,11 @@ class CategorySelector(list[str]):
 
 
 def main() -> int:
-    """Prompt the user to select a category for each <bibl> element."""
+    """Prompt the user to select a category for each <bibl> element.
+
+    Returns:
+        int: The exit code (0 for success, 1 for failure)
+    """
     parser = argparse.ArgumentParser(
         description=__doc__.strip(),
         formatter_class=argparse.RawDescriptionHelpFormatter,
