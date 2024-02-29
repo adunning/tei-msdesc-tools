@@ -8,20 +8,18 @@ Requires Python 3.11 or later.
 
 ## Scripts
 
-Usage information is available by running the scripts with the `--help` flag. For example:
+- `add_work_subjects.py`: Add work subjects to a TEI file.
+
+- `check_entity_keys.py`: Check that all entity keys in a TEI file are valid.
+
+- `create_viaf.py`: Encode VIAF data into TEI format.
+
+- `date_bindings.py`: Add binding dates to a TEI manuscript descriptions.
+
+## Usage
+
+Usage information is available by running the scripts with the `--help` or `-h` flag. For example:
 
 ```bash
 python3 create_viaf.py --help
 ```
-
-`add_work_subjects.py`
-: Add work subjects to a TEI file.
-
-`check_entity_keys.py`
-: Check that all entity keys in a TEI file are valid.
-
-`create_viaf.py`
-: Encode VIAF data into TEI format.
-
-`date_bindings.py`
-: Add binding dates to a TEI manuscript descriptions.
