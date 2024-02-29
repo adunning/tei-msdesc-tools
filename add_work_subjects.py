@@ -7,12 +7,6 @@ as <term> elements within the <bibl> elements.
 Examples:
     $ python add_work_subjects.py ../medieval-mss/works.xml
     $ python add_work_subjects.py -h
-
-Attributes:
-    works_file_path (str): Path to the TEI XML works file
-
-Returns:
-    int: The exit code (0 for success, 1 for failure)
 """
 
 import argparse

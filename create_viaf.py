@@ -7,13 +7,6 @@ Examples:
     $ python create_viaf.py 34512366 person_69848690 org_129788129
     $ python create_viaf.py 34512366 69848690 129788129 -o output.xml
     $ python create_viaf.py https://viaf.org/viaf/34512366 > output.xml
-
-Attributes:
-    viaf_ids (list[str]): VIAF IDs or URLs for authority entries
-    output_file_path (str): Output file
-
-Returns:
-    int: The exit code (0 for success, 1 for failure)
 """
 
 import argparse
