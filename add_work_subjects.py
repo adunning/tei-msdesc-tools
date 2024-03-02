@@ -89,7 +89,7 @@ def main() -> int:
         help="Path to the TEI XML file containing the <bibl> elements",
         type=str,
     )
-    args = parser.parse_args()
+    args: argparse.Namespace = parser.parse_args()
 
     works = WorksFile(args.works_file_path)
 

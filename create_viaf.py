@@ -42,22 +42,15 @@ def main() -> int:
         help="Output file",
         type=argparse.FileType("w"),
     )
-    args = parser.parse_args()
+    args: argparse.Namespace = parser.parse_args()
 
-    viaf_ids: set[int] = set(
-        sorted(
-            (
-                int(re.search(r"viaf/(\d+)", viaf_id).group(1))
-                if re.search(r"viaf/(\d+)", viaf_id) is not None
-                else (
-                    0
-                    if viaf_id.startswith("http")
-                    else int("".join(filter(str.isdigit, viaf_id)))
-                )
-            )
-            for viaf_id in args.viaf_ids
-        )
-    )
+    viaf_ids: set[int] = set()
+    for viaf_id in args.viaf_ids:
+        match = re.search(r"viaf/(\d+)", viaf_id)
+        if match is not None:
+            viaf_ids.add(int(match.group(1)))
+        else:
+            viaf_ids.add(int("".join(filter(str.isdigit, viaf_id))))
     people: list[str] = []
     organizations: list[str] = []
 

@@ -82,7 +82,7 @@ def main() -> int:
         help="Path to the directory containing the TEI XML files",
         type=str,
     )
-    args = parser.parse_args()
+    args: argparse.Namespace = parser.parse_args()
 
     for path in Collections(args.directory).paths:
         msdesc: XMLFile = XMLFile(path)

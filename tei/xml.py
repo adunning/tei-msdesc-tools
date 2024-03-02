@@ -68,7 +68,7 @@ class XMLFile:
         """Create an XML tree from a file."""
         return etree.parse(
             self.file_path,
-            parser=etree.XMLParser(ns_clean=True),
+            parser=etree.XMLParser(ns_clean=True, remove_blank_text=True),
         )
 
     def write(self) -> None:
@@ -178,21 +178,19 @@ class MSDesc(XMLFile):
         check_keys: Check if every @key reference is valid.
     """
 
-    def check_keys(self, authority_keys: set[str]) -> tuple[bool, list[str]]:
+    def check_keys(self, authority_keys: set[str]) -> set[str]:
         """Check if every @key reference is valid.
 
         Returns a tuple containing a boolean indicating
         if every @key reference is valid,
-        and a list of keys not found in the authority files.
+        and a set of keys not found in the authority files.
 
         Args:
             authority_keys (set[str]): A set of all xml:id attributes
             on <person>, <place>, <org>, and <bibl> elements.
 
         Returns:
-            tuple[bool, list[str]]: A tuple containing a boolean indicating
-            if every @key reference is valid,
-            and a list of keys not found in the authority files.
+            A set of keys not found in the authority files.
 
         Examples:
             To check if @key references are valid:
@@ -202,7 +200,7 @@ class MSDesc(XMLFile):
 
             Returns a tuple containing a boolean indicating
             if every @key reference is valid,
-            and a list of keys not found in the authority files.
+            and a set of keys not found in the authority files.
 
             >>> (True, [])
 
@@ -210,8 +208,7 @@ class MSDesc(XMLFile):
 
             >>> (False, ["person_1234", "place_5678"])
         """
-        keys_valid: bool = True
-        missing_keys: list[str] = []
+        missing_keys: set[str] = set()
 
         for key_elem in self.tree.xpath("//@key/parent::*"):
             line_number: int = key_elem.sourceline
@@ -226,7 +223,6 @@ class MSDesc(XMLFile):
                     + str(line_number)
                     + "\n"
                 )
-                keys_valid = False
             # is the key in the form of `prefix_1234`?
             elif not re.match(r"\w+_\d+", key):
                 sys.stderr.write(
@@ -238,7 +234,6 @@ class MSDesc(XMLFile):
                     + str(line_number)
                     + "\n"
                 )
-                keys_valid = False
             # is the key in the authority files?
             elif key not in authority_keys:
                 sys.stderr.write(
@@ -250,7 +245,6 @@ class MSDesc(XMLFile):
                     + str(line_number)
                     + "\n"
                 )
-                keys_valid = False
-                missing_keys.append(key)
+                missing_keys.add(key)
 
-        return keys_valid, missing_keys
+        return missing_keys

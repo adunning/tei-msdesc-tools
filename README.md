@@ -10,11 +10,11 @@ Requires Python 3.11 or later.
 
 - `add_work_subjects.py`: Add work subjects to a TEI file.
 
-- `check_entity_keys.py`: Check that all entity keys in a TEI file are valid.
-
 - `create_viaf.py`: Encode VIAF data into TEI format.
 
 - `date_bindings.py`: Add binding dates to a TEI manuscript descriptions.
+
+- `manage_entities.py`: Validate entities in a TEI file and add missing records from VIAF.
 
 ## Usage
 

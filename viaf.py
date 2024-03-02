@@ -93,6 +93,8 @@ class VIAF:
                         response.json()["redirect"]["directto"]
                     )
                     return self.fetch_data()
+
+            return response.json()
         except requests.exceptions.RequestException as err:
             if response.status_code == 404:
                 sys.stderr.write(f"VIAF ID does not exist: {self.viaf_id}\n")
@@ -100,7 +102,7 @@ class VIAF:
             else:
                 sys.stderr.write(f"Request Exception: {err}")
 
-        return response.json()
+        return None
 
     def format_date(self, date: str) -> str | None:
         """Ensures that the year is 4 digits long for ISO 8601."""
@@ -459,43 +461,47 @@ class VIAF:
             if self.death_date:
                 flourished.set("notAfter", self.death_date)
 
-        if self.gender:
-            sex = etree.SubElement(element, "sex")
-            sex.set("source", "VIAF")
-            sex.text = self.gender
+        if element_name == "person":
 
-        if self.languages:
-            for language in self.languages:
-                language_element = etree.SubElement(element, "langKnown")
-                language_element.set(
-                    "source",
-                    " ".join(language["sources"])
-                    if isinstance(language["sources"], list)
-                    else language["sources"]
-                )
-                language_element.set("tag", language["language"])
+            if self.gender:
+                sex = etree.SubElement(element, "sex")
+                sex.set("source", "VIAF")
+                sex.text = self.gender
 
-        if self.nationalities:
-            for nationality in self.nationalities:
-                nationality_element = etree.SubElement(element, "nationality")
-                nationality_element.set(
-                    "source",
-                    " ".join(nationality["sources"])
-                    if isinstance(nationality["sources"], list)
-                    else nationality["sources"]
-                )
-                nationality_element.text = nationality["nationality"]
+            if self.languages:
+                for language in self.languages:
+                    language_element = etree.SubElement(element, "langKnown")
+                    language_element.set(
+                        "source",
+                        " ".join(language["sources"])
+                        if isinstance(language["sources"], list)
+                        else language["sources"]
+                    )
+                    language_element.set("tag", language["language"])
 
-        if self.occupations:
-            for occupation in self.occupations:
-                occupation_element = etree.SubElement(element, "occupation")
-                occupation_element.set(
-                    "source",
-                    " ".join(occupation["sources"])
-                    if isinstance(occupation["sources"], list)
-                    else occupation["sources"]
-                )
-                occupation_element.text = occupation["occupation"]
+            if self.nationalities:
+                for nationality in self.nationalities:
+                    nationality_element = etree.SubElement(
+                        element, "nationality")
+                    nationality_element.set(
+                        "source",
+                        " ".join(nationality["sources"])
+                        if isinstance(nationality["sources"], list)
+                        else nationality["sources"]
+                    )
+                    nationality_element.text = nationality["nationality"]
+
+            if self.occupations:
+                for occupation in self.occupations:
+                    occupation_element = etree.SubElement(
+                        element, "occupation")
+                    occupation_element.set(
+                        "source",
+                        " ".join(occupation["sources"])
+                        if isinstance(occupation["sources"], list)
+                        else occupation["sources"]
+                    )
+                    occupation_element.text = occupation["occupation"]
 
         # Create a list of links
         note = etree.SubElement(element, "note")
