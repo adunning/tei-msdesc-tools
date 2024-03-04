@@ -89,9 +89,7 @@ class VIAF:
                         f"VIAF ID {self.viaf_id} is a redirect to "
                         f"{response.json()["redirect"]["directto"]}.\n"
                     )
-                    self.viaf_id = int(
-                        response.json()["redirect"]["directto"]
-                    )
+                    self.viaf_id = int(response.json()["redirect"]["directto"])
                     return self.fetch_data()
 
             return response.json()
@@ -140,9 +138,7 @@ class VIAF:
                 source_name, source_id = source["#text"].split("|")
                 # Remove spaces from the source ID
                 source_id = source_id.replace(" ", "")
-                self.sources.append(
-                    {"name": source_name, "id": source_id}
-                )
+                self.sources.append({"name": source_name, "id": source_id})
 
         if self.data.get("mainHeadings"):
             if isinstance(self.data.get("mainHeadings")["data"], dict):
@@ -194,7 +190,7 @@ class VIAF:
                         "subfields": [
                             {
                                 "code": subfield["@code"],
-                                "text": subfield["#text"]
+                                "text": subfield["#text"],
                             }
                             for subfield in heading["datafield"]["subfield"]
                         ],
@@ -226,7 +222,7 @@ class VIAF:
                         "subfields": [
                             {
                                 "code": subfield["@code"],
-                                "text": subfield["#text"]
+                                "text": subfield["#text"],
                             }
                             for subfield in heading["datafield"]["subfield"]
                         ],
@@ -360,7 +356,7 @@ class VIAF:
             "source",
             " ".join(display_heading["sources"])
             if isinstance(display_heading["sources"], list)
-            else display_heading["sources"]
+            else display_heading["sources"],
         )
         display_element.set("type", "display")
         display_element.text = display_heading["text"]
@@ -369,14 +365,18 @@ class VIAF:
         headings_preferred = [
             heading
             for heading in self.headings_structured
-            if any(source in heading["sources"]
-                   for source in ["LC", "DNB", "BNF", "BAV", "JPG"])
+            if any(
+                source in heading["sources"]
+                for source in ["LC", "DNB", "BNF", "BAV", "JPG"]
+            )
         ]
         variants_preferred = [
             variant
             for variant in self.name_variants
-            if any(source in variant["sources"]
-                   for source in ["LC", "DNB", "BNF", "BAV", "JPG"])
+            if any(
+                source in variant["sources"]
+                for source in ["LC", "DNB", "BNF", "BAV", "JPG"]
+            )
         ]
 
         # Add a normalized string to each list from the subfields
@@ -417,7 +417,7 @@ class VIAF:
                 "source",
                 " ".join(name["sources"])
                 if isinstance(name["sources"], list)
-                else name["sources"]
+                else name["sources"],
             )
             variant_element.set("type", "variant")
             if name["ind1"] == "0":
@@ -462,7 +462,6 @@ class VIAF:
                 flourished.set("notAfter", self.death_date)
 
         if element_name == "person":
-
             if self.gender:
                 sex = etree.SubElement(element, "sex")
                 sex.set("source", "VIAF")
@@ -475,31 +474,33 @@ class VIAF:
                         "source",
                         " ".join(language["sources"])
                         if isinstance(language["sources"], list)
-                        else language["sources"]
+                        else language["sources"],
                     )
                     language_element.set("tag", language["language"])
 
             if self.nationalities:
                 for nationality in self.nationalities:
                     nationality_element = etree.SubElement(
-                        element, "nationality")
+                        element, "nationality"
+                    )
                     nationality_element.set(
                         "source",
                         " ".join(nationality["sources"])
                         if isinstance(nationality["sources"], list)
-                        else nationality["sources"]
+                        else nationality["sources"],
                     )
                     nationality_element.text = nationality["nationality"]
 
             if self.occupations:
                 for occupation in self.occupations:
                     occupation_element = etree.SubElement(
-                        element, "occupation")
+                        element, "occupation"
+                    )
                     occupation_element.set(
                         "source",
                         " ".join(occupation["sources"])
                         if isinstance(occupation["sources"], list)
-                        else occupation["sources"]
+                        else occupation["sources"],
                     )
                     occupation_element.text = occupation["occupation"]
 
@@ -510,7 +511,6 @@ class VIAF:
         link_list.set("type", "links")
 
         for source in self.sources:
-
             viaf_sources = {
                 "BNF": {
                     "url": f"https://data.bnf.fr/en/{source["id"]}",
@@ -550,6 +550,7 @@ class VIAF:
 
         # Sort the resulting list of links by title
         link_list[:] = sorted(
-            link_list, key=lambda item: item[0][0].text or "")
+            link_list, key=lambda item: item[0][0].text or ""
+        )
 
         return element
