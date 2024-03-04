@@ -62,6 +62,7 @@ class VIAF:
     occupations: list[dict[str, str]] = field(default_factory=list)
 
     def __post_init__(self):
+        """Initialize the VIAF entity based on the VIAF ID."""
         if not re.match(r"[1-9]\d(\d{0,7}|\d{17,20})", str(self.viaf_id)):
             sys.stderr.write("VIAF ID is invalid.")
             return
@@ -69,7 +70,7 @@ class VIAF:
         self.parse_data()
 
     def fetch_data(self) -> dict[str, str] | None:
-        """Retrieves data from VIAF API based on the VIAF ID."""
+        """Retrieve data from VIAF JSON based on the VIAF ID."""
         url = f"https://www.viaf.org/viaf/{self.viaf_id}/viaf.json"
         try:
             response = requests.get(url, timeout=10)
@@ -103,7 +104,7 @@ class VIAF:
         return None
 
     def format_date(self, date: str) -> str | None:
-        """Ensures that the year is 4 digits long for ISO 8601."""
+        """Ensure that the year is 4 digits long for ISO 8601."""
         if date == "0000" or date == "0":
             return None
         elif date.startswith("-"):
@@ -121,7 +122,7 @@ class VIAF:
         return date
 
     def parse_data(self):
-        """Parses the data retrieved from the VIAF API."""
+        """Parse data retrieved from the VIAF API."""
         if self.data is None:
             return
 

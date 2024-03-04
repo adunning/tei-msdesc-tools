@@ -61,6 +61,7 @@ class XMLFile:
     """
 
     def __init__(self, file_path: str) -> None:
+        """Create an XML tree from a file."""
         self.file_path: str = file_path
         self.tree = self.read()
 
@@ -108,9 +109,10 @@ class AuthorityFile(XMLFile):
 
     @property
     def keys(self) -> set[str]:
-        """
-        Returns a set of all xml:id attributes
-        on <person>, <place>, <org>, and <bibl> elements.
+        """Find all xml:id attributes for entities in the authority file.
+
+        Returns:
+            A set of xml:id attributes on <person>, <place>, <org>, and <bibl>.
         """
         return {
             elem.get("{http://www.w3.org/XML/1998/namespace}id")
@@ -158,6 +160,7 @@ class Collections:
     """
 
     def __init__(self, directory_path: str) -> None:
+        """Create a directory of TEI XML manuscript descriptions."""
         self.directory_path: str = directory_path
 
     @property

@@ -3,3 +3,9 @@ line-length = 79
 
 [tool.ruff.format]
 docstring-code-format = true
+
+[tool.ruff.lint]
+select = ["D", "F", "E", "I", "W"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"

@@ -26,8 +26,7 @@ from viaf import VIAF
 
 
 def main() -> int:
-    """
-    Main function for managing entities in TEI XML manuscript descriptions.
+    """Manage entities in TEI XML manuscript descriptions.
 
     Parses command line arguments, validates keys, adds missing records,
     and summarizes the results.

@@ -19,8 +19,7 @@ from viaf import VIAF
 
 
 def main() -> int:
-    """
-    Main function that processes VIAF IDs and generates XML output.
+    """Process VIAF IDs and generate XML output.
 
     Returns:
         int: The exit code (0 for success, 1 for failure)

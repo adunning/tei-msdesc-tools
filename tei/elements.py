@@ -54,6 +54,7 @@ class XMLElement:
     id: str = field(default_factory=str)
 
     def __post_init__(self) -> None:
+        """Set the xml:id attribute."""
         self.id = self.element.get("{http://www.w3.org/XML/1998/namespace}id")
 
 
@@ -68,6 +69,7 @@ class Category(XMLElement):
     category_description: str = field(default_factory=str)
 
     def __post_init__(self) -> None:
+        """Set the category description."""
         super().__post_init__()
         self.category_description = self.element.findtext(
             "tei:catDesc", namespaces=Namespace.tei
@@ -76,8 +78,7 @@ class Category(XMLElement):
 
 @dataclass
 class Bibl(XMLElement):
-    """
-    Represents a <bibl> element.
+    """Represents a <bibl> element.
 
     Attributes:
         title (str): The title of the work.
@@ -89,6 +90,7 @@ class Bibl(XMLElement):
     title: str = field(default_factory=str)
 
     def __post_init__(self) -> None:
+        """Set the title of the work."""
         super().__post_init__()
         self.title = ", ".join(
             title.text
@@ -98,9 +100,7 @@ class Bibl(XMLElement):
         )
 
     def add_term(self, category: str) -> None:
-        """
-        Add a <term> element to a <bibl> element,
-        with a reference to a category.
+        """Add a <term> element to a <bibl> element referring to a category.
 
         Args:
             category (str): The category to reference.

@@ -17,18 +17,16 @@ from tei.xml import Collections, XMLFile
 
 
 class Binding(XMLElement):
-    """
-    Represents a <binding> element in a TEI file.
-    """
+    """Represents a <binding> element in a TEI file."""
 
     def add_date(self) -> bool:
-        """
-        Prompts the user to input a date or mark it as contemporary.
+        """Prompts the user to input a date or mark it as contemporary.
+
         Modifies the element to include the appropriate attribute.
 
-        Returns True if the element was modified, False otherwise.
+        Returns:
+            bool: True if the element is modified, False if it is skipped
         """
-
         # print the <binding> element text
         print("".join(self.element.xpath("string()")).strip())
 

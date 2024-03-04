@@ -1,4 +1,4 @@
-"""Add subject classifications to TEI <bibl> elements
+"""Add subject classifications to TEI <bibl> elements.
 
 This script prompts the user to select one or more subject classifications for
 each <bibl> element in a TEI XML file. The selected classifications are added
