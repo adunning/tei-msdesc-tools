@@ -53,10 +53,10 @@ class CategorySelector(list[str]):
                     for index in selection.split()
                 ]
             except ValueError:
-                print("Please enter one of more numbers.")
+                sys.stderr.write("Please enter one or more numbers.")
                 continue
             except IndexError:
-                print("Please select from the numbers listed.")
+                sys.stderr.write("Please select from the numbers listed.")
                 continue
 
     def _print_categories(self, category_descriptions: list[str]) -> None:
@@ -116,7 +116,6 @@ def main() -> int:
         # Update the XML file
         works.write()
 
-    print("\nAll works have been processed.")
     return 0
 
 

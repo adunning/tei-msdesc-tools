@@ -20,9 +20,9 @@ import sys
 
 from lxml import etree
 
+from entities.viaf import VIAF
 from tei.elements import Namespace
 from tei.xml import AuthorityFile, Collections, MSDesc
-from viaf import VIAF
 
 
 def main() -> int:

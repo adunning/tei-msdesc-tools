@@ -15,7 +15,7 @@ import sys
 
 from lxml import etree
 
-from viaf import VIAF
+from entities.viaf import VIAF
 
 
 def main() -> int:

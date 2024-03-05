@@ -436,48 +436,53 @@ class VIAF:
         # Set the birth and death dates
         if self.date_type == "lived":
             if self.birth_date:
-                birth = etree.SubElement(element, "birth")
-                birth.set("source", "VIAF")
-                birth.set("when", self.birth_date)
+                birth_element = etree.SubElement(element, "birth")
+                birth_element.set("source", "VIAF")
+                birth_element.set("when", self.birth_date)
             if self.death_date:
-                death = etree.SubElement(element, "death")
-                death.set("source", "VIAF")
-                death.set("when", self.death_date)
+                death_element = etree.SubElement(element, "death")
+                death_element.set("source", "VIAF")
+                death_element.set("when", self.death_date)
         elif self.date_type == "circa":
             if self.birth_date:
-                birth = etree.SubElement(element, "birth")
-                birth.set("cert", "low")
-                birth.set("source", "VIAF")
-                birth.set("when", self.birth_date)
+                birth_element = etree.SubElement(element, "birth")
+                birth_element.set("cert", "low")
+                birth_element.set("source", "VIAF")
+                birth_element.set("when", self.birth_date)
             if self.death_date:
-                death = etree.SubElement(element, "death")
-                death.set("cert", "low")
-                death.set("source", "VIAF")
-                death.set("when", self.death_date)
+                death_element = etree.SubElement(element, "death")
+                death_element.set("cert", "low")
+                death_element.set("source", "VIAF")
+                death_element.set("when", self.death_date)
         elif self.date_type == "flourished":
-            flourished = etree.SubElement(element, "floruit")
-            flourished.set("source", "VIAF")
+            flourished_element = etree.SubElement(element, "floruit")
+            flourished_element.set("source", "VIAF")
             if self.birth_date:
-                flourished.set("notBefore", self.birth_date)
+                flourished_element.set("notBefore", self.birth_date)
             if self.death_date:
-                flourished.set("notAfter", self.death_date)
+                flourished_element.set("notAfter", self.death_date)
 
         if element_name == "person":
             if self.gender:
-                sex = etree.SubElement(element, "sex")
-                sex.set("source", "VIAF")
-                sex.text = self.gender
+                sex_element = etree.SubElement(element, "sex")
+                sex_element.set("source", "VIAF")
+                sex_element.text = self.gender
 
             if self.languages:
+                lang_knowledge_element = etree.SubElement(
+                    element, "langKnowledge"
+                )
                 for language in self.languages:
-                    language_element = etree.SubElement(element, "langKnown")
-                    language_element.set(
+                    lang_known_element = etree.SubElement(
+                        lang_knowledge_element, "langKnown"
+                    )
+                    lang_known_element.set(
                         "source",
                         " ".join(language["sources"])
                         if isinstance(language["sources"], list)
                         else language["sources"],
                     )
-                    language_element.set("tag", language["language"])
+                    lang_known_element.set("tag", language["language"])
 
             if self.nationalities:
                 for nationality in self.nationalities:
